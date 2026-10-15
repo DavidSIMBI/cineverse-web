@@ -24,6 +24,7 @@ function SiteHeader() {
       <nav className="main-nav" aria-label="Main navigation">
         <NavLink to="/" end>Discover</NavLink>
         <NavLink to="/search">Search</NavLink>
+        <NavLink to="/genres">Genres</NavLink>
       </nav>
       <form className="header-search" role="search" onSubmit={submitSearch}>
         <button type="submit" aria-label="Search movies"><SearchRoundedIcon fontSize="small" /></button>

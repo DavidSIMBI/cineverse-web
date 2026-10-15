@@ -2,6 +2,7 @@ import { BrowserRouter, Link, Route, Routes } from 'react-router-dom'
 import SiteFooter from './components/SiteFooter.jsx'
 import SiteHeader from './components/SiteHeader.jsx'
 import HomePage from './pages/HomePage.jsx'
+import GenreBrowsePage from './pages/GenreBrowsePage.jsx'
 import MovieDetailsPage from './pages/MovieDetailsPage.jsx'
 import SearchPage from './pages/SearchPage.jsx'
 import './App.css'
@@ -15,6 +16,7 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/search" element={<SearchPage />} />
+            <Route path="/genres" element={<GenreBrowsePage />} />
             <Route path="/movie/:id" element={<MovieDetailsPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>

@@ -2,6 +2,7 @@ import 'dotenv/config'
 import cors from 'cors'
 import express from 'express'
 import healthRouter from './routes/health.routes.js'
+import genresRouter from './routes/genres.routes.js'
 import moviesRouter from './routes/movies.routes.js'
 import ApiError from './utils/api-error.js'
 
@@ -16,6 +17,7 @@ app.use(
 app.use(express.json())
 
 app.use('/api/health', healthRouter)
+app.use('/api/genres', genresRouter)
 app.use('/api/movies', moviesRouter)
 
 app.use((error, _request, response, _next) => {

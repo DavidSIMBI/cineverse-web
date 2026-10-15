@@ -96,6 +96,30 @@ export function getPopularMovies(language) {
   return requestTmdb('/movie/popular', { language })
 }
 
+export function getTrendingMovies(timeWindow, language, page) {
+  return requestTmdb(`/trending/movie/${timeWindow}`, { language, page })
+}
+
+export function getTopRatedMovies(language, page) {
+  return requestTmdb('/movie/top_rated', { language, page })
+}
+
+export function getUpcomingMovies(language, page) {
+  return requestTmdb('/movie/upcoming', { language, page })
+}
+
+export function getMovieGenres(language) {
+  return requestTmdb('/genre/movie/list', { language })
+}
+
+export function getMoviesByGenre(genreId, language, page) {
+  return requestTmdb('/discover/movie', { with_genres: genreId, language, page })
+}
+
+export function getSimilarMovies(movieId, language, page) {
+  return requestTmdb(`/movie/${movieId}/similar`, { language, page })
+}
+
 export function searchMovies(query, language) {
   return requestTmdb('/search/movie', { query, language })
 }

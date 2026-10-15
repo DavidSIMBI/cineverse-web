@@ -1,10 +1,13 @@
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded'
 import StarRoundedIcon from '@mui/icons-material/StarRounded'
 import { useEffect, useState } from 'react'
+import { useCallback } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import DiscoverySection from '../components/DiscoverySection.jsx'
 import MovieImage from '../components/MovieImage.jsx'
 import RequestState from '../components/RequestState.jsx'
-import { getApiErrorMessage, getMovieDetails } from '../services/api.js'
+import { getApiErrorMessage, getMovieDetails, getSimilarMovies } from '../services/api.js'
+import useApiResource from '../hooks/useApiResource.js'
 
 function formatRuntime(runtime) {
   if (!runtime) return null
@@ -18,6 +21,8 @@ function MovieDetailsPage() {
   const [response, setResponse] = useState({ key: '', movie: null, error: '' })
   const [attempt, setAttempt] = useState(0)
   const requestKey = `${id}:${attempt}`
+  const loadSimilar = useCallback((signal) => getSimilarMovies(id, { signal }), [id])
+  const similar = useApiResource(`similar:${id}`, loadSimilar)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -44,6 +49,7 @@ function MovieDetailsPage() {
   const runtime = formatRuntime(movie.runtime)
 
   return (
+    <>
     <article className="page-container movie-detail-page">
       <div className="detail-topline">
         <Link className="detail-back-link" to="/">
@@ -82,6 +88,8 @@ function MovieDetailsPage() {
         </section>
       </div>
     </article>
+    <DiscoverySection id="similar" title="Similar Movies" description={`More films with a feel like ${title}.`} movies={similar.data?.results || []} loading={similar.loading} error={similar.error} onRetry={similar.retry} />
+    </>
   )
 }
 

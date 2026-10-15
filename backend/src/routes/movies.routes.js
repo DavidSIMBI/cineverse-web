@@ -1,28 +1,18 @@
 import { Router } from 'express'
 import ApiError from '../utils/api-error.js'
+import { getLanguage, getPage, getPositiveId } from '../utils/movie-query.js'
 import {
   getMovieDetails,
+  getMoviesByGenre,
   getPopularMovies,
+  getSimilarMovies,
   searchMovies,
+  getTopRatedMovies,
+  getTrendingMovies,
+  getUpcomingMovies,
 } from '../services/tmdb.service.js'
 
 const router = Router()
-const DEFAULT_LANGUAGE = 'en-US'
-const LANGUAGE_PATTERN = /^[a-z]{2,3}(?:-[A-Z]{2})?$/
-
-function getLanguage(request) {
-  const language = request.query.language ?? DEFAULT_LANGUAGE
-
-  if (typeof language !== 'string' || !LANGUAGE_PATTERN.test(language)) {
-    throw new ApiError(
-      400,
-      'INVALID_LANGUAGE',
-      'Language must be a valid language code such as en-US.',
-    )
-  }
-
-  return language
-}
 
 function sendMovieResponse(response, data) {
   response.json({ success: true, data })
@@ -32,6 +22,27 @@ router.get('/popular', async (request, response) => {
   const language = getLanguage(request)
   const movies = await getPopularMovies(language)
   sendMovieResponse(response, movies)
+})
+
+router.get('/trending', async (request, response) => {
+  const timeWindow = request.query.time_window ?? 'week'
+  if (typeof timeWindow !== 'string' || !['day', 'week'].includes(timeWindow)) {
+    throw new ApiError(400, 'INVALID_TIME_WINDOW', 'time_window must be either day or week.')
+  }
+  sendMovieResponse(response, await getTrendingMovies(timeWindow, getLanguage(request), getPage(request)))
+})
+
+router.get('/top-rated', async (request, response) => {
+  sendMovieResponse(response, await getTopRatedMovies(getLanguage(request), getPage(request)))
+})
+
+router.get('/upcoming', async (request, response) => {
+  sendMovieResponse(response, await getUpcomingMovies(getLanguage(request), getPage(request)))
+})
+
+router.get('/genre/:genreId', async (request, response) => {
+  const genreId = getPositiveId(request.params.genreId, 'INVALID_GENRE_ID', 'Genre ID')
+  sendMovieResponse(response, await getMoviesByGenre(genreId, getLanguage(request), getPage(request)))
 })
 
 router.get('/search', async (request, response) => {
@@ -58,18 +69,13 @@ router.get('/search', async (request, response) => {
   sendMovieResponse(response, results)
 })
 
+router.get('/:id/similar', async (request, response) => {
+  const movieId = getPositiveId(request.params.id)
+  sendMovieResponse(response, await getSimilarMovies(movieId, getLanguage(request), getPage(request)))
+})
+
 router.get('/:id', async (request, response) => {
-  const { id } = request.params
-  const movieId = Number(id)
-
-  if (!/^[1-9]\d{0,9}$/.test(id) || movieId > 2_147_483_647) {
-    throw new ApiError(
-      400,
-      'INVALID_MOVIE_ID',
-      'Movie ID must be a positive integer.',
-    )
-  }
-
+  const movieId = getPositiveId(request.params.id)
   const language = getLanguage(request)
   const movie = await getMovieDetails(movieId, language)
   sendMovieResponse(response, movie)

@@ -1,83 +1,62 @@
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded'
 import StarRoundedIcon from '@mui/icons-material/StarRounded'
-import { useEffect, useState } from 'react'
+import { useCallback } from 'react'
 import { Link } from 'react-router-dom'
-import MovieGrid from '../components/MovieGrid.jsx'
+import DiscoverySection from '../components/DiscoverySection.jsx'
 import MovieImage from '../components/MovieImage.jsx'
-import RequestState from '../components/RequestState.jsx'
-import { getApiErrorMessage, getPopularMovies } from '../services/api.js'
+import useApiResource from '../hooks/useApiResource.js'
+import { getPopularMovies, getTopRatedMovies, getTrendingMovies, getUpcomingMovies } from '../services/api.js'
+
+function results(data) { return Array.isArray(data?.results) ? data.results : [] }
+function withoutIds(movies, ids) { return movies.filter((movie) => !ids.has(movie.id)) }
+function remember(movies, ids) { movies.forEach((movie) => ids.add(movie.id)); return movies }
 
 function HomePage() {
-  const [response, setResponse] = useState({ attempt: -1, movies: [], error: '' })
-  const [attempt, setAttempt] = useState(0)
+  const loadPopular = useCallback((signal) => getPopularMovies({ signal }), [])
+  const loadTrending = useCallback((signal) => getTrendingMovies({ signal }), [])
+  const loadTopRated = useCallback((signal) => getTopRatedMovies({ signal }), [])
+  const loadUpcoming = useCallback((signal) => getUpcomingMovies({ signal }), [])
+  const popular = useApiResource('home-popular', loadPopular)
+  const trending = useApiResource('home-trending', loadTrending)
+  const topRated = useApiResource('home-top-rated', loadTopRated)
+  const upcoming = useApiResource('home-upcoming', loadUpcoming)
 
-  useEffect(() => {
-    const controller = new AbortController()
-    getPopularMovies({ signal: controller.signal })
-      .then((data) => setResponse({ attempt, movies: data.results || [], error: '' }))
-      .catch((requestError) => {
-        if (!controller.signal.aborted) setResponse({ attempt, movies: [], error: getApiErrorMessage(requestError) })
-      })
-    return () => controller.abort()
-  }, [attempt])
-
-  const currentResponse = response.attempt === attempt
-  const movies = currentResponse ? response.movies : []
-  const error = currentResponse ? response.error : ''
-  const loading = !currentResponse
-  const featuredMovie = movies[0]
-  const primaryMovies = movies.slice(1, 7).length ? movies.slice(1, 7) : movies.slice(0, 6)
-  const moreMovies = movies.slice(7, 13)
+  const popularMovies = results(popular.data)
+  const trendingMovies = results(trending.data)
+  const featuredMovie = popularMovies[0] || trendingMovies[0]
+  const seen = new Set(featuredMovie ? [featuredMovie.id] : [])
+  const uniqueTrending = remember(withoutIds(trendingMovies, seen), seen)
+  const uniquePopular = remember(withoutIds(popularMovies, seen), seen)
+  const uniqueTopRated = remember(withoutIds(results(topRated.data), seen), seen)
+  const uniqueUpcoming = withoutIds(results(upcoming.data), seen)
 
   return (
     <div className="home-page">
       <section className="hero page-container" aria-label="Featured movie">
-        {featuredMovie ? (
-          <>
-            {featuredMovie.backdrop_path && <MovieImage path={featuredMovie.backdrop_path} size="w1280" alt="" className="hero-backdrop" loading="eager" />}
-            <div className="hero-content">
-              <span className="eyebrow"><span className="eyebrow-dot" /> Popular on CineVerse</span>
-              <h1>{featuredMovie.title || featuredMovie.original_title}</h1>
-              <div className="hero-meta">
-                {featuredMovie.release_date && <span>{featuredMovie.release_date.slice(0, 4)}</span>}
-                {featuredMovie.vote_average > 0 && <span className="rating"><StarRoundedIcon fontSize="small" /> {featuredMovie.vote_average.toFixed(1)} rating</span>}
-              </div>
-              {featuredMovie.overview && <p className="hero-description">{featuredMovie.overview}</p>}
-              <Link className="button-primary" to={`/movie/${featuredMovie.id}`}>Explore film <ArrowForwardRoundedIcon /></Link>
+        {featuredMovie ? <>
+          {featuredMovie.backdrop_path && <MovieImage path={featuredMovie.backdrop_path} size="w1280" alt="" className="hero-backdrop" loading="eager" />}
+          <div className="hero-content">
+            <span className="eyebrow"><span className="eyebrow-dot" /> Featured discovery</span>
+            <h1>{featuredMovie.title || featuredMovie.original_title}</h1>
+            <div className="hero-meta">
+              {featuredMovie.release_date && <span>{featuredMovie.release_date.slice(0, 4)}</span>}
+              {featuredMovie.vote_average > 0 && <span className="rating"><StarRoundedIcon fontSize="small" /> {featuredMovie.vote_average.toFixed(1)} rating</span>}
             </div>
-          </>
-        ) : loading ? (
-          <div className="hero-empty"><span className="eyebrow"><span className="eyebrow-dot" /> Discover something new</span><h1>Stories worth staying up for.</h1><p>Loading the latest popular movies…</p></div>
-        ) : error ? (
-          <div className="hero-empty"><span className="eyebrow"><span className="eyebrow-dot" /> Discover something new</span><h1>Stories worth staying up for.</h1><p>{error}</p><button className="button-secondary" onClick={() => setAttempt((value) => value + 1)}>Try again</button></div>
-        ) : (
-          <div className="hero-empty"><span className="eyebrow"><span className="eyebrow-dot" /> Discover something new</span><h1>Stories worth staying up for.</h1><p>Explore movie details and find a new favourite.</p><Link className="button-primary" to="/search">Search films <ArrowForwardRoundedIcon /></Link></div>
-        )}
-      </section>
-
-      <section className="page-container section-block" aria-labelledby="popular-heading">
-        <div className="section-heading">
-          <div><h2 id="popular-heading">Popular right now</h2><p>What movie fans are exploring today.</p></div>
-          <Link className="section-link" to="/search">Find a film <ArrowForwardRoundedIcon fontSize="small" /></Link>
-        </div>
-        {error || loading ? (
-          <RequestState loading={loading} error={error} onRetry={() => setAttempt((value) => value + 1)} />
-        ) : primaryMovies.length ? (
-          <MovieGrid movies={primaryMovies} />
-        ) : (
-          <RequestState empty />
-        )}
-      </section>
-
-      {!loading && !error && moreMovies.length > 0 && (
-        <section className="page-container section-block section-block--secondary" aria-labelledby="more-popular-heading">
-          <div className="section-heading">
-            <div><h2 id="more-popular-heading">More popular movies</h2><p>More titles from today’s popular movie list.</p></div>
-            <Link className="section-link" to="/search">Search the catalogue <ArrowForwardRoundedIcon fontSize="small" /></Link>
+            {featuredMovie.overview && <p className="hero-description">{featuredMovie.overview}</p>}
+            <Link className="button-primary" to={`/movie/${featuredMovie.id}`}>Explore film <ArrowForwardRoundedIcon /></Link>
           </div>
-          <MovieGrid movies={moreMovies} />
-        </section>
-      )}
+        </> : <div className="hero-empty">
+          <span className="eyebrow"><span className="eyebrow-dot" /> Discover something new</span>
+          <h1>Stories worth staying up for.</h1>
+          <p>{popular.error || trending.error || (popular.loading || trending.loading ? 'Loading movie picks…' : 'Explore movie details and find a new favourite.')}</p>
+          {popular.error || trending.error ? <button className="button-secondary" onClick={() => { popular.retry(); trending.retry() }}>Try again</button> : !popular.loading && !trending.loading && <Link className="button-primary" to="/search">Search films <ArrowForwardRoundedIcon /></Link>}
+        </div>}
+      </section>
+
+      <DiscoverySection id="trending" title="Trending Movies" description="The movies people are talking about this week." movies={uniqueTrending} loading={trending.loading} error={trending.error} onRetry={trending.retry} />
+      <DiscoverySection id="popular" title="Popular Movies" description="Fan favourites from across the catalogue." movies={uniquePopular} loading={popular.loading} error={popular.error} onRetry={popular.retry} link={{ to: '/search', label: 'Search all films' }} />
+      <DiscoverySection id="top-rated" title="Top Rated Movies" description="Highly rated films worth adding to your list." movies={uniqueTopRated} loading={topRated.loading} error={topRated.error} onRetry={topRated.retry} />
+      <DiscoverySection id="upcoming" title="Upcoming Movies" description="New releases listed by TMDB." movies={uniqueUpcoming} loading={upcoming.loading} error={upcoming.error} onRetry={upcoming.retry} />
     </div>
   )
 }
