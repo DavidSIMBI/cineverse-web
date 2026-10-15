@@ -42,6 +42,10 @@ export function getMovieDetails(id, { language = 'en-US', signal } = {}) {
   return getData(`/movies/${encodeURIComponent(id)}`, { params: { language }, signal })
 }
 
+export function getPlaybackSource(id, { signal } = {}) {
+  return getData(`/playback/${encodeURIComponent(id)}`, { signal })
+}
+
 export function getApiErrorMessage(error) {
   return (
     error.response?.data?.error?.message ||

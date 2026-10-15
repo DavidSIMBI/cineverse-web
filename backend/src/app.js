@@ -4,6 +4,7 @@ import express from 'express'
 import healthRouter from './routes/health.routes.js'
 import genresRouter from './routes/genres.routes.js'
 import moviesRouter from './routes/movies.routes.js'
+import playbackRouter from './routes/playback.routes.js'
 import ApiError from './utils/api-error.js'
 
 const app = express()
@@ -18,6 +19,7 @@ app.use(express.json())
 
 app.use('/api/health', healthRouter)
 app.use('/api/genres', genresRouter)
+app.use('/api/playback', playbackRouter)
 app.use('/api/movies', moviesRouter)
 
 app.use((error, _request, response, _next) => {

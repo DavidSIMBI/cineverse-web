@@ -5,6 +5,7 @@ import HomePage from './pages/HomePage.jsx'
 import GenreBrowsePage from './pages/GenreBrowsePage.jsx'
 import MovieDetailsPage from './pages/MovieDetailsPage.jsx'
 import SearchPage from './pages/SearchPage.jsx'
+import WatchPage from './pages/WatchPage.jsx'
 import './App.css'
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
             <Route path="/search" element={<SearchPage />} />
             <Route path="/genres" element={<GenreBrowsePage />} />
             <Route path="/movie/:id" element={<MovieDetailsPage />} />
+            <Route path="/watch/:id" element={<WatchPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </main>
