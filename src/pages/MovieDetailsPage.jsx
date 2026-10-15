@@ -45,27 +45,40 @@ function MovieDetailsPage() {
 
   return (
     <article className="page-container movie-detail-page">
+      <div className="detail-topline">
+        <Link className="detail-back-link" to="/">
+          <ArrowBackRoundedIcon /> <span>Back to discovery</span>
+        </Link>
+        <span className="detail-kicker">CineVerse · film guide</span>
+      </div>
       <div className="detail-backdrop">
-        {movie.backdrop_path && <MovieImage path={movie.backdrop_path} size="w1280" alt="" />}
+        <MovieImage path={movie.backdrop_path} size="w1280" alt="" className="detail-backdrop-image" loading="eager" />
         <div className="detail-title-wrap">
           <span className="eyebrow"><span className="eyebrow-dot" /> Movie details</span>
           <h1>{title}</h1>
           <div className="detail-meta">
-            {year && <span>{year}</span>}
-            {runtime && <span>{runtime}</span>}
-            {movie.vote_average > 0 && <span className="rating"><StarRoundedIcon fontSize="small" /> {movie.vote_average.toFixed(1)} rating</span>}
-            {movie.original_language && <span>{movie.original_language.toUpperCase()}</span>}
+            <span className="detail-meta-item">{year || 'Release date unavailable'}</span>
+            {runtime && <span className="detail-meta-item">{runtime}</span>}
+            {movie.vote_average > 0 && <span className="detail-meta-item rating"><StarRoundedIcon fontSize="small" /> {movie.vote_average.toFixed(1)} rating</span>}
+            {movie.original_language && <span className="detail-meta-item">{movie.original_language.toUpperCase()}</span>}
           </div>
         </div>
       </div>
       <div className="detail-content">
         <div className="detail-poster"><MovieImage path={movie.poster_path} alt={`${title} poster`} /></div>
         <section className="detail-overview">
-          <h2>Overview</h2>
-          <p>{movie.overview || 'An overview is not available for this movie yet.'}</p>
-          {movie.genres?.length > 0 && <div className="genre-list" aria-label="Genres">{movie.genres.map((genre) => <span className="genre-chip" key={genre.id}>{genre.name}</span>)}</div>}
+          <div className="detail-copy">
+            <span className="detail-section-label">The story</span>
+            <h2>Overview</h2>
+            <p>{movie.overview || 'An overview is not available for this movie yet.'}</p>
+          </div>
+          {movie.genres?.length > 0 && (
+            <div className="detail-genres">
+              <h3>Genres</h3>
+              <div className="genre-list">{movie.genres.map((genre) => <span className="genre-chip" key={genre.id}>{genre.name}</span>)}</div>
+            </div>
+          )}
           <div className="metadata-note">This page shows movie information only. Metadata does not provide or authorize full movie playback.</div>
-          <div className="detail-actions"><Link className="button-secondary" to="/"><ArrowBackRoundedIcon /> Back to discovery</Link></div>
         </section>
       </div>
     </article>

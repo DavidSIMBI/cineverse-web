@@ -26,13 +26,15 @@ function HomePage() {
   const error = currentResponse ? response.error : ''
   const loading = !currentResponse
   const featuredMovie = movies[0]
+  const primaryMovies = movies.slice(1, 7).length ? movies.slice(1, 7) : movies.slice(0, 6)
+  const moreMovies = movies.slice(7, 13)
 
   return (
     <div className="home-page">
       <section className="hero page-container" aria-label="Featured movie">
         {featuredMovie ? (
           <>
-            {featuredMovie.backdrop_path && <MovieImage path={featuredMovie.backdrop_path} size="w1280" alt="" className="hero-backdrop" />}
+            {featuredMovie.backdrop_path && <MovieImage path={featuredMovie.backdrop_path} size="w1280" alt="" className="hero-backdrop" loading="eager" />}
             <div className="hero-content">
               <span className="eyebrow"><span className="eyebrow-dot" /> Popular on CineVerse</span>
               <h1>{featuredMovie.title || featuredMovie.original_title}</h1>
@@ -60,12 +62,22 @@ function HomePage() {
         </div>
         {error || loading ? (
           <RequestState loading={loading} error={error} onRetry={() => setAttempt((value) => value + 1)} />
-        ) : movies.length ? (
-          <MovieGrid movies={movies.slice(0, 12)} />
+        ) : primaryMovies.length ? (
+          <MovieGrid movies={primaryMovies} />
         ) : (
           <RequestState empty />
         )}
       </section>
+
+      {!loading && !error && moreMovies.length > 0 && (
+        <section className="page-container section-block section-block--secondary" aria-labelledby="more-popular-heading">
+          <div className="section-heading">
+            <div><h2 id="more-popular-heading">More popular movies</h2><p>More titles from today’s popular movie list.</p></div>
+            <Link className="section-link" to="/search">Search the catalogue <ArrowForwardRoundedIcon fontSize="small" /></Link>
+          </div>
+          <MovieGrid movies={moreMovies} />
+        </section>
+      )}
     </div>
   )
 }
