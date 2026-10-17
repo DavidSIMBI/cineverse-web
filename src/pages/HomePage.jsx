@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom'
 import DiscoverySection from '../components/DiscoverySection.jsx'
 import MovieImage from '../components/MovieImage.jsx'
 import useApiResource from '../hooks/useApiResource.js'
-import { getPopularMovies, getTopRatedMovies, getTrendingMovies, getUpcomingMovies } from '../services/api.js'
+import { getPopularMovies, getTopRatedMovies, getTrendingMovies, getUpcomingMovies, getTrendingTv } from '../services/api.js'
 
 function results(data) { return Array.isArray(data?.results) ? data.results : [] }
 function withoutIds(movies, ids) { return movies.filter((movie) => !ids.has(movie.id)) }
@@ -17,10 +17,12 @@ function HomePage() {
   const loadTrending = useCallback((signal) => getTrendingMovies({ signal }), [])
   const loadTopRated = useCallback((signal) => getTopRatedMovies({ signal }), [])
   const loadUpcoming = useCallback((signal) => getUpcomingMovies({ signal }), [])
+  const loadTrendingTv = useCallback((signal) => getTrendingTv({ signal }), [])
   const popular = useApiResource('home-popular', loadPopular)
   const trending = useApiResource('home-trending', loadTrending)
   const topRated = useApiResource('home-top-rated', loadTopRated)
   const upcoming = useApiResource('home-upcoming', loadUpcoming)
+  const trendingTv = useApiResource('home-trending-tv', loadTrendingTv)
 
   const popularMovies = results(popular.data)
   const trendingMovies = results(trending.data)
@@ -69,6 +71,7 @@ function HomePage() {
       <DiscoverySection id="popular" title="Popular Movies" description="Fan favourites from across the catalogue." movies={uniquePopular} loading={popular.loading} error={popular.error} onRetry={popular.retry} link={{ to: '/search', label: 'Search all films' }} />
       <DiscoverySection id="top-rated" title="Top Rated Movies" description="Highly rated films worth adding to your list." movies={uniqueTopRated} loading={topRated.loading} error={topRated.error} onRetry={topRated.retry} />
       <DiscoverySection id="upcoming" title="Upcoming Movies" description="New releases listed by TMDB." movies={uniqueUpcoming} loading={upcoming.loading} error={upcoming.error} onRetry={upcoming.retry} />
+      <DiscoverySection id="trending-tv" title="Trending TV Series" description="TV series people are watching this week." movies={(trendingTv.data?.results || []).map((show) => ({ ...show, media_type: 'tv' }))} loading={trendingTv.loading} error={trendingTv.error} onRetry={trendingTv.retry} link={{ to: '/tv', label: 'Browse TV shows' }} />
     </div>
   )
 }

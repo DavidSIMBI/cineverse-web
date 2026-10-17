@@ -42,6 +42,30 @@ export function getMovieDetails(id, { language = 'en-US', signal } = {}) {
   return getData(`/movies/${encodeURIComponent(id)}`, { params: { language }, signal })
 }
 
+export function getPopularTv({ language = 'en-US', page = 1, signal } = {}) {
+  return getData('/tv/popular', { params: { language, page }, signal })
+}
+
+export function getTrendingTv({ timeWindow = 'week', language = 'en-US', page = 1, signal } = {}) {
+  return getData('/tv/trending', { params: { language, page, time_window: timeWindow }, signal })
+}
+
+export function getTvGenres({ language = 'en-US', signal } = {}) {
+  return getData('/tv/genres', { params: { language }, signal })
+}
+
+export function getTvByGenre(genreId, { language = 'en-US', page = 1, signal } = {}) {
+  return getData(`/tv/genre/${encodeURIComponent(genreId)}`, { params: { language, page }, signal })
+}
+
+export function searchCatalog(query, { language = 'en-US', signal } = {}) {
+  return getData('/tv/search', { params: { query, language }, signal })
+}
+
+export function getTvDetails(id, { language = 'en-US', signal } = {}) {
+  return getData(`/tv/${encodeURIComponent(id)}`, { params: { language }, signal })
+}
+
 export function getPlaybackSource(id, { signal } = {}) {
   return getData(`/playback/${encodeURIComponent(id)}`, { signal })
 }

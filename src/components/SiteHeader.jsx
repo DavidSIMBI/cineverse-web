@@ -22,13 +22,15 @@ function SiteHeader() {
         <span className="brand-name">Cine<span>Verse</span></span>
       </Link>
       <nav className="main-nav" aria-label="Main navigation">
-        <NavLink to="/" end>Discover</NavLink>
-        <NavLink to="/search">Search</NavLink>
+        <NavLink to="/" end>Home</NavLink>
+        <NavLink to="/movies">Movies</NavLink>
+        <NavLink to="/tv">TV Shows</NavLink>
+        <NavLink to="/watchlist">My Watchlist</NavLink>
         <NavLink to="/genres">Genres</NavLink>
       </nav>
       <form className="header-search" role="search" onSubmit={submitSearch}>
-        <button type="submit" aria-label="Search movies"><SearchRoundedIcon fontSize="small" /></button>
-        <input aria-label="Search movie titles" placeholder="Search films, people..." value={query} onChange={(event) => setDraft({ query: currentQuery, value: event.target.value })} />
+        <button type="submit" aria-label="Search movies and TV shows"><SearchRoundedIcon fontSize="small" /></button>
+        <input aria-label="Search movie and TV titles" placeholder="Search films and TV..." value={query} onChange={(event) => setDraft({ query: currentQuery, value: event.target.value })} />
       </form>
     </header>
   )

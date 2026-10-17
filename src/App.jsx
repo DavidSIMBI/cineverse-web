@@ -6,6 +6,10 @@ import GenreBrowsePage from './pages/GenreBrowsePage.jsx'
 import MovieDetailsPage from './pages/MovieDetailsPage.jsx'
 import SearchPage from './pages/SearchPage.jsx'
 import WatchPage from './pages/WatchPage.jsx'
+import TvShowsPage from './pages/TvShowsPage.jsx'
+import TvDetailsPage from './pages/TvDetailsPage.jsx'
+import MoviesPage from './pages/MoviesPage.jsx'
+import WatchlistPage from './pages/WatchlistPage.jsx'
 import './App.css'
 
 function App() {
@@ -17,6 +21,10 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/search" element={<SearchPage />} />
+            <Route path="/movies" element={<MoviesPage />} />
+            <Route path="/tv" element={<TvShowsPage />} />
+            <Route path="/tv/:id" element={<TvDetailsPage />} />
+            <Route path="/watchlist" element={<WatchlistPage />} />
             <Route path="/genres" element={<GenreBrowsePage />} />
             <Route path="/movie/:id" element={<MovieDetailsPage />} />
             <Route path="/watch/:id" element={<WatchPage />} />

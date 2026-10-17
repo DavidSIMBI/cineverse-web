@@ -127,3 +127,27 @@ export function searchMovies(query, language) {
 export function getMovieDetails(movieId, language) {
   return requestTmdb(`/movie/${movieId}`, { language })
 }
+
+export function getPopularTv(language, page = 1) {
+  return requestTmdb('/tv/popular', { language, page })
+}
+
+export function getTrendingTv(timeWindow, language, page = 1) {
+  return requestTmdb(`/trending/tv/${timeWindow}`, { language, page })
+}
+
+export function getTvGenres(language) {
+  return requestTmdb('/genre/tv/list', { language })
+}
+
+export function getTvByGenre(genreId, language, page = 1) {
+  return requestTmdb('/discover/tv', { with_genres: genreId, language, page })
+}
+
+export function searchMulti(query, language) {
+  return requestTmdb('/search/multi', { query, language })
+}
+
+export function getTvDetails(tvId, language) {
+  return requestTmdb(`/tv/${tvId}`, { language })
+}

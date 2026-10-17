@@ -4,6 +4,7 @@ import express from 'express'
 import healthRouter from './routes/health.routes.js'
 import genresRouter from './routes/genres.routes.js'
 import moviesRouter from './routes/movies.routes.js'
+import tvRouter from './routes/tv.routes.js'
 import playbackRouter from './routes/playback.routes.js'
 import ApiError from './utils/api-error.js'
 
@@ -21,6 +22,7 @@ app.use('/api/health', healthRouter)
 app.use('/api/genres', genresRouter)
 app.use('/api/playback', playbackRouter)
 app.use('/api/movies', moviesRouter)
+app.use('/api/tv', tvRouter)
 
 app.use((error, _request, response, _next) => {
   if (error instanceof ApiError) {

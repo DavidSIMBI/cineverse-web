@@ -10,6 +10,7 @@ import RequestState from '../components/RequestState.jsx'
 import { getApiErrorMessage, getMovieDetails, getPlaybackSource, getSimilarMovies } from '../services/api.js'
 import useApiResource from '../hooks/useApiResource.js'
 import { validatePlaybackSource } from '../services/playback.js'
+import WatchlistButton from '../components/WatchlistButton.jsx'
 
 function formatRuntime(runtime) {
   if (!runtime) return null
@@ -107,6 +108,7 @@ function MovieDetailsPage() {
               <Link className="button-secondary" to={`/watch/${id}`}>View watch page</Link>
             </>}
           </div>
+          <div className="detail-watchlist-action"><WatchlistButton item={movie} mediaType="movie" /></div>
           <div className="metadata-note">This page shows movie information only. Metadata does not provide or authorize full movie playback.</div>
         </section>
       </div>
