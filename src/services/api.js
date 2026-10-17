@@ -66,13 +66,19 @@ export function getTvDetails(id, { language = 'en-US', signal } = {}) {
   return getData(`/tv/${encodeURIComponent(id)}`, { params: { language }, signal })
 }
 
-export function getPlaybackSource(id, { signal } = {}) {
-  return getData(`/playback/${encodeURIComponent(id)}`, { signal })
+export function getPlaybackSource(mediaType, id, { language = 'en-US', signal } = {}) {
+  if (!['movie', 'tv'].includes(mediaType) || !/^[1-9]\d{0,9}$/.test(String(id ?? ''))) {
+    const error = new Error('A valid movie or TV series ID is required to check for a trailer.')
+    error.cineverseMessage = error.message
+    return Promise.reject(error)
+  }
+  return getData(`/playback/${encodeURIComponent(mediaType)}/${encodeURIComponent(id)}`, { params: { language }, signal })
 }
 
 export function getApiErrorMessage(error) {
   return (
     error.response?.data?.error?.message ||
+    error.cineverseMessage ||
     (error.code === 'ECONNABORTED'
       ? 'The request took too long. Please try again.'
       : 'We could not connect to CineVerse. Check that the backend is running and try again.')

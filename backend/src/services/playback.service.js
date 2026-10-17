@@ -1,48 +1,37 @@
-import ApiError from '../utils/api-error.js'
+import { getMovieVideos, getTvVideos } from './tmdb.service.js'
 
-const AUTHORIZED_DEMO_HOST = 'interactive-examples.mdn.mozilla.net'
-const PLAYBACK_SOURCES = new Map([
-  ['550', {
-    url: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
-    type: 'video/mp4',
-    kind: 'demo',
-    title: 'Flower sample video',
-    license: 'CC0 1.0',
-    attribution: 'MDN sample media',
-    description: 'A short public-domain sample used to demonstrate the CineVerse player. It is not the movie listed on this page.',
-  }],
-])
+const YOUTUBE_KEY_PATTERN = /^[A-Za-z0-9_-]{6,20}$/
 
-function validateSource(source) {
-  let url
-  try {
-    url = new URL(source.url)
-  } catch {
-    return false
-  }
-
-  const safeUrl = url.protocol === 'https:' && !url.username && !url.password && !url.hash
-  const supportedType = ['video/mp4', 'video/webm'].includes(source.type)
-  const supportedKind = ['demo', 'trailer', 'movie'].includes(source.kind)
-  const validDemo = source.kind !== 'demo' || (
-    url.origin === `https://${AUTHORIZED_DEMO_HOST}` &&
-    url.pathname === '/media/cc0-videos/flower.mp4' &&
-    !url.search &&
-    source.type === 'video/mp4'
-  )
-
-  return safeUrl && supportedType && supportedKind && validDemo &&
-    [source.title, source.license, source.attribution, source.description]
-      .every((value) => typeof value === 'string' && value.trim().length > 0)
+function languageRank(video, language) {
+  const requested = language.toLowerCase().split('-')[0]
+  if (video.iso_639_1?.toLowerCase() === requested) return 2
+  if (video.iso_639_1?.toLowerCase() === 'en') return 1
+  return 0
 }
 
-export function getPlaybackSource(movieId) {
-  const source = PLAYBACK_SOURCES.get(String(movieId))
-  if (!source) return { available: false, kind: 'unavailable' }
-
-  if (!validateSource(source)) {
-    throw new ApiError(500, 'INVALID_PLAYBACK_SOURCE', 'The configured playback source is invalid.')
+function selectTrailer(videos, language, mediaType) {
+  const candidates = (videos || []).filter((video) =>
+    video.site === 'YouTube' && video.type === 'Trailer' && YOUTUBE_KEY_PATTERN.test(video.key || ''),
+  )
+  candidates.sort((a, b) => Number(Boolean(b.official)) - Number(Boolean(a.official)) || languageRank(b, language) - languageRank(a, language) || (b.published_at || '').localeCompare(a.published_at || ''))
+  const trailer = candidates[0]
+  if (!trailer) return { available: false, reason: 'NO_TRAILER' }
+  return {
+    available: true,
+    source: {
+      kind: 'trailer',
+      provider: 'YouTube',
+      key: trailer.key,
+      title: trailer.name || `${mediaType === 'tv' ? 'TV series' : 'Movie'} trailer`,
+      official: Boolean(trailer.official),
+      language: trailer.iso_639_1 || null,
+    },
   }
+}
 
-  return { available: true, source: { ...source } }
+export async function getPlaybackSource(mediaType, id, language) {
+  const response = mediaType === 'tv'
+    ? await getTvVideos(id, language)
+    : await getMovieVideos(id, language)
+  return selectTrailer(response?.results, language, mediaType)
 }

@@ -1,16 +1,14 @@
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded'
-import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded'
-import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded'
 import StarRoundedIcon from '@mui/icons-material/StarRounded'
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import DiscoverySection from '../components/DiscoverySection.jsx'
 import MovieImage from '../components/MovieImage.jsx'
 import RequestState from '../components/RequestState.jsx'
-import { getApiErrorMessage, getMovieDetails, getPlaybackSource, getSimilarMovies } from '../services/api.js'
+import { getApiErrorMessage, getMovieDetails, getSimilarMovies } from '../services/api.js'
 import useApiResource from '../hooks/useApiResource.js'
-import { validatePlaybackSource } from '../services/playback.js'
 import WatchlistButton from '../components/WatchlistButton.jsx'
+import TrailerAction from '../components/TrailerAction.jsx'
 
 function formatRuntime(runtime) {
   if (!runtime) return null
@@ -25,9 +23,7 @@ function MovieDetailsPage() {
   const [attempt, setAttempt] = useState(0)
   const requestKey = `${id}:${attempt}`
   const loadSimilar = useCallback((signal) => getSimilarMovies(id, { signal }), [id])
-  const loadPlayback = useCallback((signal) => getPlaybackSource(id, { signal }), [id])
   const similar = useApiResource(`similar:${id}`, loadSimilar)
-  const playback = useApiResource(`detail-playback:${id}`, loadPlayback)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -52,12 +48,6 @@ function MovieDetailsPage() {
   const title = movie.title || movie.original_title || 'Untitled movie'
   const year = movie.release_date?.slice(0, 4)
   const runtime = formatRuntime(movie.runtime)
-  const playbackSource = validatePlaybackSource(playback.data)
-  const playbackLabel = playbackSource?.kind === 'demo'
-    ? 'Play Demo'
-    : playbackSource?.kind === 'trailer'
-      ? 'Watch Trailer'
-      : 'Watch Movie'
 
   return (
     <>
@@ -95,21 +85,9 @@ function MovieDetailsPage() {
               <div className="genre-list">{movie.genres.map((genre) => <span className="genre-chip" key={genre.id}>{genre.name}</span>)}</div>
             </div>
           )}
-          <div className="detail-watch-action">
-            {playback.loading ? <span className="watch-availability" role="status">Checking video availability…</span> : playback.error ? <>
-              <span className="watch-availability" role="status">Video availability could not be checked.</span>
-              <button className="button-secondary" type="button" onClick={playback.retry}><RefreshRoundedIcon /> Retry</button>
-              <Link className="button-secondary" to={`/watch/${id}`}>View watch page</Link>
-            </> : playbackSource ? <>
-              <Link className="button-primary" to={`/watch/${id}`}><PlayArrowRoundedIcon /> {playbackLabel}</Link>
-              {playbackSource.kind === 'demo' && <span className="watch-availability">Demo clip only — this is not the movie.</span>}
-            </> : <>
-              <span className="watch-availability">No authorized video source is available for this movie.</span>
-              <Link className="button-secondary" to={`/watch/${id}`}>View watch page</Link>
-            </>}
-          </div>
+          <div className="detail-watch-action"><TrailerAction mediaType="movie" id={id} /></div>
           <div className="detail-watchlist-action"><WatchlistButton item={movie} mediaType="movie" /></div>
-          <div className="metadata-note">This page shows movie information only. Metadata does not provide or authorize full movie playback.</div>
+          <div className="metadata-note">This page provides movie information and links to available trailers. It does not provide the full movie.</div>
         </section>
       </div>
     </article>

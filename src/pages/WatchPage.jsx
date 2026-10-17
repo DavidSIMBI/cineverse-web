@@ -4,47 +4,31 @@ import { Link, useParams } from 'react-router-dom'
 import RequestState from '../components/RequestState.jsx'
 import VideoPlayer from '../components/VideoPlayer.jsx'
 import useApiResource from '../hooks/useApiResource.js'
-import { getMovieDetails, getPlaybackSource } from '../services/api.js'
+import { getMovieDetails, getPlaybackSource, getTvDetails } from '../services/api.js'
 import { validatePlaybackSource } from '../services/playback.js'
 
 function WatchPage() {
-  const { id } = useParams()
-  const loadMovie = useCallback((signal) => getMovieDetails(id, { signal }), [id])
-  const loadPlayback = useCallback((signal) => getPlaybackSource(id, { signal }), [id])
-  const movieState = useApiResource(`watch-movie:${id}`, loadMovie)
-  const playbackState = useApiResource(`watch-source:${id}`, loadPlayback)
+  const { mediaType, id } = useParams()
+  const validType = ['movie', 'tv'].includes(mediaType)
+  const loadTitle = useCallback((signal) => mediaType === 'tv' ? getTvDetails(id, { signal }) : getMovieDetails(id, { signal }), [mediaType, id])
+  const loadTrailer = useCallback((signal) => getPlaybackSource(mediaType, id, { signal }), [mediaType, id])
+  const titleState = useApiResource(`watch-title:${mediaType}:${id}`, loadTitle)
+  const trailerState = useApiResource(`watch-trailer:${mediaType}:${id}`, loadTrailer)
 
-  if (movieState.loading || movieState.error) {
-    return <section className="page-container watch-page"><RequestState loading={movieState.loading} error={movieState.error} onRetry={movieState.retry} /></section>
-  }
+  if (!validType) return <section className="page-container watch-page"><div className="watch-unavailable" role="alert"><h2>Invalid title type</h2><p>Open a movie or TV series from its details page to view its trailer.</p><Link className="text-link" to="/">Return to CineVerse</Link></div></section>
+  if (titleState.loading || titleState.error) return <section className="page-container watch-page"><RequestState loading={titleState.loading} error={titleState.error} onRetry={titleState.retry} /><Link className="text-link" to={mediaType === 'tv' ? '/tv' : '/movies'}>Return to {mediaType === 'tv' ? 'TV shows' : 'movies'}</Link></section>
 
-  const movie = movieState.data
-  if (!movie) return <section className="page-container watch-page"><RequestState empty /></section>
+  const title = mediaType === 'tv'
+    ? titleState.data?.name || titleState.data?.original_name || 'Untitled series'
+    : titleState.data?.title || titleState.data?.original_title || 'Untitled movie'
+  const returnTo = `/${mediaType}/${id}`
+  const source = validatePlaybackSource(trailerState.data)
 
-  const title = movie.title || movie.original_title || 'Untitled movie'
-  const source = validatePlaybackSource(playbackState.data)
-  const sourceKindLabel = source?.kind === 'demo' ? 'DEMO CLIP' : source?.kind === 'trailer' ? 'AUTHORIZED TRAILER' : 'AUTHORIZED VIDEO'
-
-  return (
-    <section className="page-container watch-page">
-      <div className="watch-heading">
-        <Link className="detail-back-link" to={`/movie/${id}`}><ArrowBackRoundedIcon /><span>Back to movie details</span></Link>
-        <span className="detail-kicker">CineVerse · watch page</span>
-      </div>
-      <div className="watch-title"><span className="eyebrow"><span className="eyebrow-dot" /> Movie information</span><h1>{title}</h1>
-        <p>{[movie.release_date?.slice(0, 4), movie.runtime ? `${movie.runtime} min` : null, movie.original_language?.toUpperCase()].filter(Boolean).join(' · ') || 'Movie metadata'}</p>
-      </div>
-      {playbackState.loading ? <RequestState loading /> : playbackState.error ? <RequestState error={playbackState.error} onRetry={playbackState.retry} /> : source ? (
-        <div className="watch-player-block">
-          <div className="demo-source-label"><span className="demo-badge">{sourceKindLabel}</span><div><h2>{source.title}</h2><p>{source.description}</p></div></div>
-          <VideoPlayer source={source} />
-          <p className="watch-source-credit">{source.attribution} · {source.license}.{source.kind === 'demo' ? ' This sample clip is not the movie shown above.' : ''}</p>
-        </div>
-      ) : (
-        <div className="watch-unavailable" role="status"><h2>No authorized video source is available</h2><p>CineVerse has movie information for this title, but no licensed playback source is configured. Movie posters and metadata do not provide permission to stream a film.</p><Link className="text-link" to={`/movie/${id}`}>Return to movie details</Link></div>
-      )}
-    </section>
-  )
+  return <section className="page-container watch-page">
+    <div className="watch-heading"><Link className="detail-back-link" to={returnTo}><ArrowBackRoundedIcon /><span>Back to {mediaType === 'tv' ? 'series' : 'movie'} details</span></Link><span className="detail-kicker">CineVerse · trailer</span></div>
+    <div className="watch-title"><span className="eyebrow"><span className="eyebrow-dot" /> {source?.official ? 'Official trailer' : 'Trailer'}</span><h1>{title}</h1><p>{mediaType === 'tv' ? titleState.data?.first_air_date || 'TV series trailer' : titleState.data?.release_date || 'Movie trailer'}</p></div>
+    {trailerState.loading ? <RequestState loading /> : trailerState.error ? <RequestState error={trailerState.error} onRetry={trailerState.retry} /> : source ? <div className="watch-player-block"><div className="trailer-source-label"><span className="trailer-badge">YOUTUBE TRAILER</span><div><h2>{source.title}</h2><p>{source.official ? 'Official trailer' : 'Trailer'}{source.language ? ` · ${source.language.toUpperCase()}` : ''}</p></div></div><VideoPlayer source={source} /><p className="watch-source-credit">Trailer provided by YouTube. CineVerse does not provide the full movie or series.</p></div> : <div className="watch-unavailable" role="status"><h2>No trailer available</h2><p>TMDB does not list a suitable YouTube trailer for this {mediaType === 'tv' ? 'series' : 'movie'}.</p><Link className="text-link" to={returnTo}>Return to {mediaType === 'tv' ? 'series' : 'movie'} details</Link></div>}
+  </section>
 }
 
 export default WatchPage

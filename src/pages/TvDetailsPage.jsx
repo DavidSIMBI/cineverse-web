@@ -6,6 +6,7 @@ import MovieImage from '../components/MovieImage.jsx'
 import RequestState from '../components/RequestState.jsx'
 import { getApiErrorMessage, getTvDetails } from '../services/api.js'
 import WatchlistButton from '../components/WatchlistButton.jsx'
+import TrailerAction from '../components/TrailerAction.jsx'
 
 function TvDetailsPage() {
   const { id } = useParams()
@@ -28,7 +29,7 @@ function TvDetailsPage() {
   return <article className="page-container movie-detail-page">
     <div className="detail-topline"><Link className="detail-back-link" to="/tv"><ArrowBackRoundedIcon /><span>Back to TV shows</span></Link><span className="detail-kicker">CineVerse · TV guide</span></div>
     <div className="detail-backdrop"><MovieImage path={show.backdrop_path} size="w1280" alt="" className="detail-backdrop-image" loading="eager" /><div className="detail-title-wrap"><span className="eyebrow"><span className="eyebrow-dot" /> TV series details</span><h1>{title}</h1><div className="detail-meta"><span className="detail-meta-item">{show.first_air_date || 'First air date unavailable'}</span>{show.vote_average > 0 && <span className="detail-meta-item rating"><StarRoundedIcon fontSize="small" /> {show.vote_average.toFixed(1)} rating</span>}{show.original_language && <span className="detail-meta-item">{show.original_language.toUpperCase()}</span>}</div></div></div>
-    <div className="detail-content"><div className="detail-poster"><MovieImage path={show.poster_path} alt={`${title} poster`} /></div><section className="detail-overview"><div className="detail-copy"><span className="detail-section-label">The story</span><h2>Overview</h2><p>{show.overview || 'An overview is not available for this series yet.'}</p></div>{show.genres?.length > 0 && <div className="detail-genres"><h3>Genres</h3><div className="genre-list">{show.genres.map((genre) => <span className="genre-chip" key={genre.id}>{genre.name}</span>)}</div></div>}<div className="detail-watchlist-action"><WatchlistButton item={show} mediaType="tv" /></div></section></div>
+    <div className="detail-content"><div className="detail-poster"><MovieImage path={show.poster_path} alt={`${title} poster`} /></div><section className="detail-overview"><div className="detail-copy"><span className="detail-section-label">The story</span><h2>Overview</h2><p>{show.overview || 'An overview is not available for this series yet.'}</p></div>{show.genres?.length > 0 && <div className="detail-genres"><h3>Genres</h3><div className="genre-list">{show.genres.map((genre) => <span className="genre-chip" key={genre.id}>{genre.name}</span>)}</div></div>}<div className="detail-watch-action"><TrailerAction mediaType="tv" id={id} /></div><div className="detail-watchlist-action"><WatchlistButton item={show} mediaType="tv" /></div></section></div>
   </article>
 }
 

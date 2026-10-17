@@ -25,7 +25,7 @@ The frontend calls the CineVerse backend. The backend sends authenticated reques
 | `/tv/:id` | TV series details |
 | `/watchlist` | Saved movies and TV series |
 
-The app also has `/watch/:id`, a separate demo/watch page. Video playback is not required for the movie discovery assignment.
+The app also has `/watch/:mediaType/:id` for trailers, where `mediaType` is `movie` or `tv`. Older `/watch/:id` movie links redirect to the explicit movie route. Trailer playback uses YouTube's embedded player; it does not provide a full movie or episode.
 
 ## Requirements
 
@@ -68,7 +68,7 @@ Terminal 2 — frontend (Vite defaults to port 5173):
 npm run dev
 ```
 
-Open the local URL printed by Vite. The Vite development server proxies `/api` requests to `http://localhost:3001`. Check the backend at `http://localhost:3001/api/health`.
+Open the local URL printed by Vite. The backend uses `PORT` from `backend/.env` (default `3001`), and Vite reads that same port setting to proxy `/api` requests. If you override `PORT` in the shell, start both processes with that same value. Check the backend at `http://localhost:<PORT>/api/health`.
 
 ## Backend API
 
@@ -93,6 +93,7 @@ Main endpoints include:
 | `GET /api/tv/genre/:genreId` | TV series by genre |
 | `GET /api/tv/search?query=...` | Mixed movie and TV search (people are filtered out) |
 | `GET /api/tv/:id` | TV series details |
+| `GET /api/playback/:mediaType/:id` | Available YouTube trailer for a movie or TV series |
 
 For example, `/api/movies/search?query=The%20Matrix` and `/api/tv/search?query=The%20Bear` search titles. TMDB credentials are required for metadata endpoints. If `TMDB_ACCESS_TOKEN` is missing, the backend reports that TMDB is not configured.
 

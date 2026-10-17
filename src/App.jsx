@@ -1,4 +1,4 @@
-import { BrowserRouter, Link, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Link, Navigate, Route, Routes, useParams } from 'react-router-dom'
 import SiteFooter from './components/SiteFooter.jsx'
 import SiteHeader from './components/SiteHeader.jsx'
 import HomePage from './pages/HomePage.jsx'
@@ -27,7 +27,8 @@ function App() {
             <Route path="/watchlist" element={<WatchlistPage />} />
             <Route path="/genres" element={<GenreBrowsePage />} />
             <Route path="/movie/:id" element={<MovieDetailsPage />} />
-            <Route path="/watch/:id" element={<WatchPage />} />
+            <Route path="/watch/:mediaType/:id" element={<WatchPage />} />
+            <Route path="/watch/:id" element={<LegacyMovieWatchRedirect />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </main>
@@ -35,6 +36,11 @@ function App() {
       </div>
     </BrowserRouter>
   )
+}
+
+function LegacyMovieWatchRedirect() {
+  const { id } = useParams()
+  return <Navigate to={`/watch/movie/${id}`} replace />
 }
 
 function NotFoundPage() {

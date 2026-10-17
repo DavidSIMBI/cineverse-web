@@ -1,5 +1,4 @@
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded'
-import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded'
 import StarRoundedIcon from '@mui/icons-material/StarRounded'
 import { useCallback } from 'react'
 import { Link } from 'react-router-dom'
@@ -54,17 +53,6 @@ function HomePage() {
           <p>{popular.error || trending.error || (popular.loading || trending.loading ? 'Loading movie picks…' : 'Explore movie details and find a new favourite.')}</p>
           {popular.error || trending.error ? <button className="button-secondary" onClick={() => { popular.retry(); trending.retry() }}>Try again</button> : !popular.loading && !trending.loading && <Link className="button-primary" to="/search">Search films <ArrowForwardRoundedIcon /></Link>}
         </div>}
-      </section>
-
-      <section className="page-container video-demo-entry" aria-labelledby="video-demo-heading">
-        <div className="video-demo-copy">
-          <span className="eyebrow"><span className="eyebrow-dot" /> Try the player</span>
-          <h2 id="video-demo-heading">Video Player Demo</h2>
-          <p>Open a short CC0 flower sample to try the player controls. This demo clip is not the movie shown on its watch page.</p>
-        </div>
-        <Link className="button-secondary" to="/watch/550" aria-label="Open the video player demo">
-          <PlayArrowRoundedIcon /> Open demo player
-        </Link>
       </section>
 
       <DiscoverySection id="trending" title="Trending Movies" description="The movies people are talking about this week." movies={uniqueTrending} loading={trending.loading} error={trending.error} onRetry={trending.retry} />

@@ -63,7 +63,7 @@ async function requestTmdb(path, params = {}) {
     }
 
     if (tmdbResponse.status === 404) {
-      throw new ApiError(404, 'MOVIE_NOT_FOUND', 'The requested movie was not found.')
+      throw new ApiError(404, 'TITLE_NOT_FOUND', 'The requested title was not found.')
     }
 
     if (tmdbResponse.status >= 500) {
@@ -128,6 +128,10 @@ export function getMovieDetails(movieId, language) {
   return requestTmdb(`/movie/${movieId}`, { language })
 }
 
+export function getMovieVideos(movieId, language) {
+  return requestTmdb(`/movie/${movieId}/videos`, { language })
+}
+
 export function getPopularTv(language, page = 1) {
   return requestTmdb('/tv/popular', { language, page })
 }
@@ -150,4 +154,8 @@ export function searchMulti(query, language) {
 
 export function getTvDetails(tvId, language) {
   return requestTmdb(`/tv/${tvId}`, { language })
+}
+
+export function getTvVideos(tvId, language) {
+  return requestTmdb(`/tv/${tvId}/videos`, { language })
 }
