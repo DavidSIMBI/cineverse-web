@@ -114,10 +114,10 @@ npm run preview
 
 ## Deployment
 
-CineVerse is not documented as deployed, and no live URL is provided. The `/api` proxy in `vite.config.js` is for local Vite development only; it does not route production requests.
+The Vite proxy in `vite.config.js` is for local development only. For Vercel, [vercel.json](vercel.json) forwards `/api/*` requests to the deployed Express API and rewrites other paths to `index.html` for React Router direct navigation and refreshes.
 
-For production, deploy the Express backend to a Node.js hosting service and make its API publicly reachable. Configure `TMDB_ACCESS_TOKEN` as a secret environment variable on the backend host, and configure its `PORT` according to the host's requirements. Do not add the TMDB token to frontend environment variables or build output.
+The backend is hosted separately at `https://cineverse-api-kdy7.onrender.com`. Keep `TMDB_ACCESS_TOKEN` configured only as a secret on that backend host. Do not add it to Vercel project environment variables or frontend code. The Vercel rewrite makes browser API calls same-origin with the frontend, so the Express localhost-only CORS list is not used for these proxied browser requests.
 
-Deploy the Vite frontend to a static hosting service. Configure that host to forward `/api/*` requests to the deployed backend, or configure a production API base URL in the frontend and allow the deployed frontend origin in Express CORS. The current Express CORS configuration only allows localhost development origins, so production CORS must be updated if the frontend and backend use separate origins. Configure SPA fallback so direct visits to React Router routes such as `/tv/1399` and `/watchlist` serve the frontend entry page.
+For the Vercel project, use the repository root as **Root Directory**, select the **Vite** framework preset, set **Install Command** to `npm install`, **Build Command** to `npm run build`, and **Output Directory** to `dist`. No frontend environment variables are required. No Vercel deployment URL is claimed here; verify the deployed site and its API rewrites from the Vercel project after deployment.
 
 TMDB attribution is required when displaying TMDB data. See the [TMDB API FAQ](https://developer.themoviedb.org/docs/faq) for the current attribution requirements and include TMDB's required notice in the submitted application.
